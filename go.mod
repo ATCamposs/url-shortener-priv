@@ -3,12 +3,17 @@ module go-authentication-boilerplate
 go 1.15
 
 require (
-	github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef
+	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/gofiber/fiber/v2 v2.1.1
-	github.com/google/uuid v1.1.2
-	github.com/joho/godotenv v1.3.0
-	golang.org/x/crypto v0.0.0-20201016220609-9e8e0b390897
-	gorm.io/driver/postgres v1.0.5
-	gorm.io/gorm v1.20.5
+	github.com/gofiber/fiber/v2 v2.33.0
+	github.com/google/uuid v1.3.0
+	github.com/jackc/pgx/v4 v4.16.1 // indirect
+	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/joho/godotenv v1.4.0
+	github.com/klauspost/compress v1.15.4 // indirect
+	github.com/valyala/fasthttp v1.37.0 // indirect
+	golang.org/x/crypto v0.0.0-20220518034528-6f7dac969898
+	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
+	gorm.io/driver/postgres v1.3.5
+	gorm.io/gorm v1.23.5
 )
