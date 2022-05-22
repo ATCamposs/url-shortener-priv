@@ -33,7 +33,7 @@ func GenerateAccessClaims(uuid string) (*models.Claims, string) {
 		},
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS512, claim)
 	tokenString, err := token.SignedString(jwtKey)
 	if err != nil {
 		panic(err)
@@ -69,7 +69,7 @@ func GenerateRefreshClaims(cl *models.Claims) string {
 	// create a claim on DB
 	db.DB.Create(&refreshClaim)
 
-	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaim)
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS512, refreshClaim)
 	refreshTokenString, err := refreshToken.SignedString(jwtKey)
 	if err != nil {
 		panic(err)
