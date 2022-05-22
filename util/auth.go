@@ -3,10 +3,11 @@ package util
 import (
 	db "go-authentication-boilerplate/database"
 	"go-authentication-boilerplate/models"
+	"strings"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 var jwtKey = []byte(db.PRIVKEY)
@@ -80,13 +81,15 @@ func GenerateRefreshClaims(cl *models.Claims) string {
 // SecureAuth returns a middleware which secures all the private routes
 func SecureAuth() func(*fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
-		accessToken := c.Get("access_token")
+		accessToken := strings.Split(c.Get("Authorization"), "Bearer ")[1]
 		claims := new(models.Claims)
 		token, err := jwt.ParseWithClaims(accessToken, claims,
 			func(token *jwt.Token) (interface{}, error) {
 				return jwtKey, nil
 			})
-
+		if err != nil {
+			panic(err)
+		}
 		if token.Valid {
 			if claims.ExpiresAt < time.Now().Unix() {
 				return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{

@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 // User represents a User schema
@@ -9,7 +9,7 @@ type User struct {
 	Base
 	Email    string `json:"email" gorm:"unique"`
 	Username string `json:"username" gorm:"unique"`
-	Password string `json:"password"`
+	Password string `json:"-"`
 }
 
 // UserErrors represent the error format for user routes
@@ -22,6 +22,6 @@ type UserErrors struct {
 
 // Claims represent the structure of the JWT token
 type Claims struct {
-	jwt.StandardClaims
 	ID uint `gorm:"primaryKey"`
+	jwt.StandardClaims
 }

@@ -4,8 +4,8 @@ go 1.15
 
 require (
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gofiber/fiber/v2 v2.33.0
+	github.com/golang-jwt/jwt/v4 v4.4.1
 	github.com/google/uuid v1.3.0
 	github.com/jackc/pgx/v4 v4.16.1 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect

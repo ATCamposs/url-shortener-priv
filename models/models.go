@@ -14,7 +14,6 @@ func GenerateISOString() string {
 
 // Base contains common columns for all tables
 type Base struct {
-	ID        uint      `gorm:"primaryKey"`
 	UUID      uuid.UUID `json:"_id" gorm:"primaryKey;autoIncrement:false"`
 	CreatedAt string    `json:"created_at"`
 	UpdatedAt string    `json:"updated_at"`
