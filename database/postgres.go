@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"url-shortener/models"
+	"url-shortener/domain/user"
+	"url-shortener/domain/user/auth/token"
 
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
@@ -43,6 +44,6 @@ func ConnectToDB() {
 	DB.Logger = logger.Default.LogMode(logger.Info)
 
 	log.Print("Running the migrations...")
-	DB.AutoMigrate(&models.User{}, &models.Claims{})
+	DB.AutoMigrate(&user.User{}, &token.Claim{})
 
 }

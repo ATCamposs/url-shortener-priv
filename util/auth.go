@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 	db "url-shortener/database"
-	"url-shortener/models"
+	"url-shortener/domain/user/auth/token"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
@@ -21,10 +21,10 @@ func GenerateTokens(uuid string) (string, string) {
 }
 
 // GenerateAccessClaims returns a claim and a acess_token string
-func GenerateAccessClaims(uuid string) (*models.Claims, string) {
+func GenerateAccessClaims(uuid string) (*token.Claim, string) {
 
 	t := time.Now()
-	claim := &models.Claims{
+	claim := &token.Claim{
 		StandardClaims: jwt.StandardClaims{
 			Issuer:    uuid,
 			ExpiresAt: t.Add(1 * time.Hour).Unix(),
@@ -43,21 +43,21 @@ func GenerateAccessClaims(uuid string) (*models.Claims, string) {
 }
 
 // GenerateRefreshClaims returns refresh_token
-func GenerateRefreshClaims(cl *models.Claims) string {
-	result := db.DB.Where(&models.Claims{
+func GenerateRefreshClaims(cl *token.Claim) string {
+	result := db.DB.Where(&token.Claim{
 		StandardClaims: jwt.StandardClaims{
 			Issuer: cl.Issuer,
 		},
-	}).Find(&models.Claims{})
+	}).Find(&token.Claim{})
 
 	// checking the number of refresh tokens stored.
 	// If the number is higher than 3, remove all the refresh tokens and leave only new one.
 	if result.RowsAffected > 3 {
-		db.DB.Where(&models.Claims{StandardClaims: jwt.StandardClaims{Issuer: cl.Issuer}}).Delete(&models.Claims{})
+		db.DB.Where(&token.Claim{StandardClaims: jwt.StandardClaims{Issuer: cl.Issuer}}).Delete(&token.Claim{})
 	}
 
 	t := time.Now()
-	refreshClaim := &models.Claims{
+	refreshClaim := &token.Claim{
 		StandardClaims: jwt.StandardClaims{
 			Issuer:    cl.Issuer,
 			ExpiresAt: t.Add(10 * 24 * time.Hour).Unix(),
@@ -82,7 +82,7 @@ func GenerateRefreshClaims(cl *models.Claims) string {
 func SecureAuth() func(*fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
 		accessToken := strings.Split(c.Get("Authorization"), "Bearer ")[1]
-		claims := new(models.Claims)
+		claims := new(token.Claim)
 		token, err := jwt.ParseWithClaims(accessToken, claims,
 			func(token *jwt.Token) (interface{}, error) {
 				return jwtKey, nil

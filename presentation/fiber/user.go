@@ -4,7 +4,8 @@ import (
 	"math/rand"
 	"time"
 	db "url-shortener/database"
-	"url-shortener/models"
+	"url-shortener/domain/user"
+	"url-shortener/domain/user/auth/token"
 	"url-shortener/util"
 
 	"golang.org/x/crypto/bcrypt"
@@ -17,7 +18,7 @@ var jwtKey = []byte(db.PRIVKEY)
 
 // CreateUser route registers a User into the database
 func CreateUser(c *fiber.Ctx) error {
-	u := new(models.User)
+	u := new(user.User)
 
 	if err := c.BodyParser(u); err != nil {
 		return c.JSON(fiber.Map{
@@ -32,10 +33,10 @@ func CreateUser(c *fiber.Ctx) error {
 		return c.JSON(errors)
 	}
 
-	if count := db.DB.Where(&models.User{Email: u.Email}).First(new(models.User)).RowsAffected; count > 0 {
+	if count := db.DB.Where(&user.User{Email: u.Email}).First(new(user.User)).RowsAffected; count > 0 {
 		errors.Err, errors.Email = true, "Email is already registered"
 	}
-	if count := db.DB.Where(&models.User{Username: u.Username}).First(new(models.User)).RowsAffected; count > 0 {
+	if count := db.DB.Where(&user.User{Username: u.Username}).First(new(user.User)).RowsAffected; count > 0 {
 		errors.Err, errors.Username = true, "Username is already registered"
 	}
 	if errors.Err {
@@ -86,10 +87,10 @@ func LoginUser(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"error": true, "input": "Please review your input"})
 	}
 
-	u := new(models.User)
+	u := new(user.User)
 	if res := db.DB.Where(
-		&models.User{Email: input.Identity}).Or(
-		&models.User{Username: input.Identity},
+		&user.User{Email: input.Identity}).Or(
+		&user.User{Username: input.Identity},
 	).First(&u); res.RowsAffected <= 0 {
 		return c.JSON(fiber.Map{"error": true, "general": "Invalid Credentials."})
 	}
@@ -124,8 +125,8 @@ func GetAccessToken(c *fiber.Ctx) error {
 
 	refreshToken := reToken.RefreshToken
 
-	refreshClaims := new(models.Claims)
-	token, _ := jwt.ParseWithClaims(refreshToken, refreshClaims,
+	refreshClaims := new(token.Claim)
+	actualToken, _ := jwt.ParseWithClaims(refreshToken, refreshClaims,
 		func(token *jwt.Token) (interface{}, error) {
 			return jwtKey, nil
 		})
@@ -133,13 +134,13 @@ func GetAccessToken(c *fiber.Ctx) error {
 	if res := db.DB.Where(
 		"expires_at = ? AND issued_at = ? AND issuer = ?",
 		refreshClaims.ExpiresAt, refreshClaims.IssuedAt, refreshClaims.Issuer,
-	).First(&models.Claims{}); res.RowsAffected <= 0 {
+	).First(&token.Claim{}); res.RowsAffected <= 0 {
 		// no such refresh token exist in the database
 		c.ClearCookie("access_token", "refresh_token")
 		return c.SendStatus(fiber.StatusForbidden)
 	}
 
-	if token.Valid {
+	if actualToken.Valid {
 		if refreshClaims.ExpiresAt < time.Now().Unix() {
 			// refresh token is expired
 			c.ClearCookie("access_token", "refresh_token")
@@ -172,7 +173,7 @@ func GetAccessToken(c *fiber.Ctx) error {
 func GetUserData(c *fiber.Ctx) error {
 	id := c.Locals("id")
 
-	u := new(models.User)
+	u := new(user.User)
 	if res := db.DB.Where("uuid = ?", id).First(&u); res.RowsAffected <= 0 {
 		return c.JSON(fiber.Map{"error": true, "general": "Cannot find the User"})
 	}
