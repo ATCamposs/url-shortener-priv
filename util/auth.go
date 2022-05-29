@@ -1,10 +1,10 @@
 package util
 
 import (
-	db "go-authentication-boilerplate/database"
-	"go-authentication-boilerplate/models"
 	"strings"
 	"time"
+	db "url-shortener/database"
+	"url-shortener/models"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"

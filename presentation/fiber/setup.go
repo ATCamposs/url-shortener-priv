@@ -1,7 +1,7 @@
 package fiber
 
 import (
-	"go-authentication-boilerplate/util"
+	"url-shortener/util"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"

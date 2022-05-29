@@ -1,8 +1,8 @@
 package util
 
 import (
-	"go-authentication-boilerplate/models"
 	"regexp"
+	"url-shortener/models"
 
 	valid "github.com/asaskevich/govalidator"
 )

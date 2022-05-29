@@ -2,9 +2,9 @@ package database
 
 import (
 	"fmt"
-	"go-authentication-boilerplate/models"
 	"log"
 	"os"
+	"url-shortener/models"
 
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"

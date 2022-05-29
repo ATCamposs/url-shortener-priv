@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"go-authentication-boilerplate/database"
-	"go-authentication-boilerplate/presentation/fiber"
+	"url-shortener/database"
+	"url-shortener/presentation/fiber"
 )
 
 func main() {

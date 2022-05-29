@@ -1,11 +1,11 @@
 package fiber
 
 import (
-	db "go-authentication-boilerplate/database"
-	"go-authentication-boilerplate/models"
-	"go-authentication-boilerplate/util"
 	"math/rand"
 	"time"
+	db "url-shortener/database"
+	"url-shortener/models"
+	"url-shortener/util"
 
 	"golang.org/x/crypto/bcrypt"
 

@@ -1,4 +1,4 @@
-module go-authentication-boilerplate
+module url-shortener
 
 go 1.15
 
