@@ -5,6 +5,7 @@ import (
 	"time"
 	db "url-shortener/database"
 	"url-shortener/domain/user/auth/token"
+	"url-shortener/provider/date"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
@@ -23,7 +24,7 @@ func GenerateTokens(uuid string) (string, string) {
 // GenerateAccessClaims returns a claim and a acess_token string
 func GenerateAccessClaims(uuid string) (*token.Claim, string) {
 
-	t := time.Now()
+	t := date.New().Now()
 	claim := &token.Claim{
 		StandardClaims: jwt.StandardClaims{
 			Issuer:    uuid,
@@ -56,7 +57,7 @@ func GenerateRefreshClaims(cl *token.Claim) string {
 		db.DB.Where(&token.Claim{StandardClaims: jwt.StandardClaims{Issuer: cl.Issuer}}).Delete(&token.Claim{})
 	}
 
-	t := time.Now()
+	t := date.New().Now()
 	refreshClaim := &token.Claim{
 		StandardClaims: jwt.StandardClaims{
 			Issuer:    cl.Issuer,

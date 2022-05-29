@@ -6,6 +6,7 @@ import (
 	db "url-shortener/database"
 	"url-shortener/domain/user"
 	"url-shortener/domain/user/auth/token"
+	"url-shortener/provider/date"
 	"url-shortener/util"
 
 	"golang.org/x/crypto/bcrypt"
@@ -54,6 +55,10 @@ func CreateUser(c *fiber.Ctx) error {
 		panic(err)
 	}
 	u.Password = string(hashedPassword)
+
+	// Add created and updated dates
+	now := date.New().NowInRfc3339()
+	u.CreatedAt, u.UpdatedAt = now, now
 
 	if err := db.DB.Create(&u).Error; err != nil {
 		return c.JSON(fiber.Map{
@@ -141,7 +146,7 @@ func GetAccessToken(c *fiber.Ctx) error {
 	}
 
 	if actualToken.Valid {
-		if refreshClaims.ExpiresAt < time.Now().Unix() {
+		if refreshClaims.ExpiresAt < date.New().Now().Unix() {
 			// refresh token is expired
 			c.ClearCookie("access_token", "refresh_token")
 			return c.SendStatus(fiber.StatusForbidden)

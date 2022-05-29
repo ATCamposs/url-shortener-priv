@@ -1,7 +1,6 @@
 package util
 
 import (
-	"regexp"
 	"url-shortener/domain/user"
 
 	valid "github.com/asaskevich/govalidator"
@@ -25,10 +24,11 @@ func ValidateRegister(u *user.User) *user.UserErrors {
 		e.Err, e.Email = true, "Must be a valid email"
 	}
 
-	re := regexp.MustCompile(`\\d`) // regex check for at least one integer in string
-	if !(len(u.Password) >= 8 && valid.HasLowerCase(u.Password) && valid.HasUpperCase(u.Password) && re.MatchString(u.Password)) {
-		e.Err, e.Password = true, "Length of password should be atleast 8 and it must be a combination of uppercase letters, lowercase letters and numbers"
-	}
+	// TODO create new validation for password
+	//re := regexp.MustCompile("\\d") // regex check for at least one integer in string
+	//if !(len(u.Password) >= 8 && valid.HasLowerCase(u.Password) && valid.HasUpperCase(u.Password)) {
+	//	e.Err, e.Password = true, "Length of password should be atleast 8 and it must be a combination of uppercase letters, lowercase letters and numbers"
+	//}
 
 	return e
 }
