@@ -14,14 +14,6 @@ import (
 func CreateServer() *fiber.App {
 	app := fiber.New()
 
-	return app
-}
-
-func main() {
-	// Connect to Postgres
-	database.ConnectToDB()
-	app := CreateServer()
-
 	app.Use(cors.New())
 
 	router.SetupRoutes(app)
@@ -30,6 +22,14 @@ func main() {
 	app.Use(func(c *fiber.Ctx) error {
 		return c.SendStatus(404) // => 404 "Not Found"
 	})
+
+	return app
+}
+
+func main() {
+	// Connect to Postgres
+	database.ConnectToDB()
+	app := CreateServer()
 
 	log.Fatal(app.Listen(":3000"))
 }
