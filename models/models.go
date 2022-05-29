@@ -1,16 +1,11 @@
 package models
 
 import (
-	"time"
+	"url-shortener/provider/date"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
-
-// GenerateISOString generates a time string equivalent to Date.now().toISOString in JavaScript
-func GenerateISOString() string {
-	return time.Now().UTC().Format("2006-01-02T15:04:05.999Z07:00")
-}
 
 // Base contains common columns for all tables
 type Base struct {
@@ -26,7 +21,7 @@ func (base *Base) BeforeCreate(tx *gorm.DB) error {
 	base.UUID = uuid
 
 	// generate timestamps
-	t := GenerateISOString()
+	t := date.New().NowInRfc3339()
 	base.CreatedAt, base.UpdatedAt = t, t
 
 	return nil
@@ -35,6 +30,6 @@ func (base *Base) BeforeCreate(tx *gorm.DB) error {
 // AfterUpdate will update the Base struct after every update
 func (base *Base) AfterUpdate(tx *gorm.DB) error {
 	// update timestamps
-	base.UpdatedAt = GenerateISOString()
+	base.UpdatedAt = date.New().NowInRfc3339()
 	return nil
 }
