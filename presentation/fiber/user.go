@@ -1,4 +1,4 @@
-package router
+package fiber
 
 import (
 	db "go-authentication-boilerplate/database"

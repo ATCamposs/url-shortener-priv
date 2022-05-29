@@ -1,4 +1,4 @@
-package router
+package fiber
 
 import (
 	"go-authentication-boilerplate/util"

@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"go-authentication-boilerplate/database"
-	"go-authentication-boilerplate/router"
+	"go-authentication-boilerplate/presentation/fiber"
 )
 
 func main() {
@@ -12,7 +12,7 @@ func main() {
 	database.ConnectToDB()
 
 	// Create fiber presentation app
-	app := router.CreateFiberServer()
+	app := fiber.CreateFiberServer()
 
 	log.Fatal(app.Listen(":3000"))
 }
