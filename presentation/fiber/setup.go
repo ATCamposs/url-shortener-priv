@@ -3,6 +3,7 @@ package fiber
 import (
 	"url-shortener/util"
 
+	"github.com/goccy/go-json"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
@@ -12,7 +13,11 @@ var USER fiber.Router
 
 // CreateFiberServer creates a new Fiber instance
 func CreateFiberServer() *fiber.App {
-	app := fiber.New()
+	// change original json encode/decode for better performance
+	app := fiber.New(fiber.Config{
+		JSONEncoder: json.Marshal,
+		JSONDecoder: json.Unmarshal,
+	})
 
 	app.Use(cors.New())
 

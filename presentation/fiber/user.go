@@ -1,15 +1,13 @@
 package fiber
 
 import (
-	"math/rand"
 	"time"
 	db "url-shortener/database"
-	"url-shortener/domain/user"
 	"url-shortener/domain/user/auth/token"
+	"url-shortener/domain/user/entity"
 	"url-shortener/provider/date"
+	"url-shortener/service"
 	"url-shortener/util"
-
-	"golang.org/x/crypto/bcrypt"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
@@ -19,7 +17,7 @@ var jwtKey = []byte(db.PRIVKEY)
 
 // CreateUser route registers a User into the database
 func CreateUser(c *fiber.Ctx) error {
-	u := new(user.User)
+	u := new(entity.User)
 
 	if err := c.BodyParser(u); err != nil {
 		return c.JSON(fiber.Map{
@@ -28,43 +26,9 @@ func CreateUser(c *fiber.Ctx) error {
 		})
 	}
 
-	// validate if the email, username and password are in correct format
-	errors := util.ValidateRegister(u)
-	if errors.Err {
-		return c.JSON(errors)
-	}
-
-	if count := db.DB.Where(&user.User{Email: u.Email}).First(new(user.User)).RowsAffected; count > 0 {
-		errors.Err, errors.Email = true, "Email is already registered"
-	}
-	if count := db.DB.Where(&user.User{Username: u.Username}).First(new(user.User)).RowsAffected; count > 0 {
-		errors.Err, errors.Username = true, "Username is already registered"
-	}
-	if errors.Err {
-		return c.JSON(errors)
-	}
-
-	// Hashing the password with a random salt
-	password := []byte(u.Password)
-	hashedPassword, err := bcrypt.GenerateFromPassword(
-		password,
-		rand.Intn(bcrypt.MaxCost-bcrypt.MinCost)+bcrypt.MinCost,
-	)
-
+	u, err := service.Register(u)
 	if err != nil {
-		panic(err)
-	}
-	u.Password = string(hashedPassword)
-
-	// Add created and updated dates
-	now := date.New().NowInRfc3339()
-	u.CreatedAt, u.UpdatedAt = now, now
-
-	if err := db.DB.Create(&u).Error; err != nil {
-		return c.JSON(fiber.Map{
-			"error":   true,
-			"general": "Something went wrong, please try again later. 😕",
-		})
+		c.JSON(err)
 	}
 
 	// setting up the authorization cookies
@@ -81,28 +45,15 @@ func CreateUser(c *fiber.Ctx) error {
 
 // LoginUser route logins a user in the app
 func LoginUser(c *fiber.Ctx) error {
-	type LoginInput struct {
-		Identity string `json:"identity"`
-		Password string `json:"password"`
-	}
-
-	input := new(LoginInput)
+	input := new(util.LoginInput)
 
 	if err := c.BodyParser(input); err != nil {
 		return c.JSON(fiber.Map{"error": true, "input": "Please review your input"})
 	}
 
-	u := new(user.User)
-	if res := db.DB.Where(
-		&user.User{Email: input.Identity}).Or(
-		&user.User{Username: input.Identity},
-	).First(&u); res.RowsAffected <= 0 {
-		return c.JSON(fiber.Map{"error": true, "general": "Invalid Credentials."})
-	}
-
-	// Comparing the password with the hash
-	if err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(input.Password)); err != nil {
-		return c.JSON(fiber.Map{"error": true, "general": "Invalid Credentials."})
+	u, err := service.Login(input)
+	if err != nil {
+		c.JSON(err)
 	}
 
 	// setting up the authorization cookies
@@ -119,16 +70,18 @@ func LoginUser(c *fiber.Ctx) error {
 
 // GetAccessToken generates and sends a new access token iff there is a valid refresh token
 func GetAccessToken(c *fiber.Ctx) error {
-	type RefreshToken struct {
-		RefreshToken string `json:"refresh_token"`
-	}
 
-	reToken := new(RefreshToken)
+	reToken := new(util.RefreshToken)
 	if err := c.BodyParser(reToken); err != nil {
 		return c.JSON(fiber.Map{"error": true, "input": "Please review your input"})
 	}
 
 	refreshToken := reToken.RefreshToken
+
+	u, err := service.GetAccessToken(refreshToken)
+	if err != nil {
+		c.JSON(err)
+	}
 
 	refreshClaims := new(token.Claim)
 	actualToken, _ := jwt.ParseWithClaims(refreshToken, refreshClaims,
@@ -178,7 +131,7 @@ func GetAccessToken(c *fiber.Ctx) error {
 func GetUserData(c *fiber.Ctx) error {
 	id := c.Locals("id")
 
-	u := new(user.User)
+	u := new(entity.User)
 	if res := db.DB.Where("uuid = ?", id).First(&u); res.RowsAffected <= 0 {
 		return c.JSON(fiber.Map{"error": true, "general": "Cannot find the User"})
 	}

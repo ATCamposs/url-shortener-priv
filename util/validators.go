@@ -2,6 +2,7 @@ package util
 
 import (
 	"url-shortener/domain/user"
+	"url-shortener/domain/user/entity"
 
 	valid "github.com/asaskevich/govalidator"
 )
@@ -16,7 +17,7 @@ func IsEmpty(str string) (bool, string) {
 }
 
 // ValidateRegister func validates the body of user for registration
-func ValidateRegister(u *user.User) *user.UserErrors {
+func ValidateRegister(u *entity.User) *user.UserErrors {
 	e := &user.UserErrors{}
 	e.Err, e.Username = IsEmpty(u.Username)
 

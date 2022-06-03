@@ -11,6 +11,15 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
+type LoginInput struct {
+	Identity string `json:"identity"`
+	Password string `json:"password"`
+}
+
+type RefreshToken struct {
+	RefreshToken string `json:"refresh_token"`
+}
+
 var jwtKey = []byte(db.PRIVKEY)
 
 // GenerateTokens generates the access and refresh tokens
